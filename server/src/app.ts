@@ -93,6 +93,8 @@ export function createApp({ db, committee, relayToken, now = Date.now }: Options
     const time = c.req.header(timeHeader);
     if (key && sig && time) {
       const url = new URL(c.req.url);
+      // Vercel's catch-all route adds its own "...route" query parameter, which the device never signed.
+      for (const k of [...url.searchParams.keys()]) if (k.startsWith("...") || k === "route") url.searchParams.delete(k);
       const skew = Math.abs(now() - Number(time));
       if (!Number.isFinite(skew) || skew > clockSkew) return c.json({ error: "clock", message: "This device's clock is too far off. Check the time and try again." }, 401);
       const ok = await verifyDevice(key, canonical(c.req.method, url.pathname + url.search, time, body), sig);

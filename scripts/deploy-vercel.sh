@@ -8,6 +8,6 @@ cd "$(dirname "$0")/.."
 export NODE_OPTIONS="--dns-result-order=ipv4first --no-network-family-autoselection"
 vercel build --yes ${1:+--prod}
 fn=".vercel/output/functions/api/[[...route]].func"
-npx --yes esbuild@0.25.10 "api/[[...route]].ts" --bundle --platform=node --format=esm --target=node22 --alias:@libsql/client=@libsql/client/web --outfile="$fn/api/[[...route]].js" --log-level=warning --allow-overwrite
+npx --yes esbuild@0.25.10 "api/[[...route]].ts" --bundle --platform=node --format=esm --target=node22 --alias:@libsql/client=@libsql/client/web --banner:js="import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);" --outfile="$fn/api/[[...route]].js" --log-level=warning --allow-overwrite
 rm -f "$fn/api/[[...route]].js.map"
 vercel deploy --prebuilt ${1:+--prod}
