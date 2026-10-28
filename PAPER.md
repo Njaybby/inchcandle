@@ -88,6 +88,7 @@ The compact block scan carries no memos, and the memory store keeps an old memo 
 
 - Sealing, the beacon check and the opening run in the browser, with tests that include positive controls.
 - We ran the chain layer in the browser light client against a local regtest chain with every upgrade through NU6.3 active. A funder paid paddle 7 a deposit with a memo, the room read back the value, memo and paddle, the room refunded it with a memo, and the funder read the refund. The public testnet runs NU7, which the pinned `librustzcash` can't build transactions for.
+- On 28 October 2026 we ran a full room against a real vault on Base Sepolia, from the seller's deposit to the winner's claim at a fresh address. The transactions are listed in the README.
 - The room screens run on a preview network, where the directory stores sealed bids the way the chain would and can't read them, since they're timelocked.
 - We've run the vaults and a 2-of-3 attester committee end to end on a local EVM chain, from a sealed bid to the winner claiming an NFT, including with one attester stopped.
 
