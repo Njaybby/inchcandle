@@ -10,6 +10,7 @@ import { toast } from "../lib/toast";
 import { useDeviceId } from "../shell/Shell";
 import { Hash } from "../ui/Hash";
 import { DeviceMark } from "../ui/Seal";
+import { WalletPanel } from "./WalletPanel";
 
 /** This device: its key, and every room it hosts or holds a paddle in. Nothing here has an account behind it. */
 export function You() {
@@ -43,6 +44,7 @@ export function You() {
           </p>
         </div>
       </section>
+      <WalletPanel />
 
       <section className="section">
         <div className="section-head">

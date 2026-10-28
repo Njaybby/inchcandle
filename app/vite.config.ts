@@ -15,10 +15,31 @@ const isolated = { "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Em
 const proxy = {
   "/api": { target: "http://127.0.0.1:5242", changeOrigin: false },
   "/rpc/anvil": { target: "http://127.0.0.1:8545", changeOrigin: true, rewrite: (p: string) => p.replace(/^\/rpc\/anvil/, "") },
+  "/rpc/regtest": { target: "http://127.0.0.1:18232", changeOrigin: true, rewrite: (p: string) => p.replace(/^\/rpc\/regtest/, "") },
+};
+
+// Development only: the local chain's faucet runs in the visitor's browser, so the dev server hands it the funder's seed.
+// Regtest coins are worth nothing and the route does not exist in a build.
+const funderFile = process.env.IC_FUNDER ?? "../../.dev/funder-test.json";
+const devFunder = {
+  name: "dev-funder",
+  apply: "serve" as const,
+  configureServer(server: { middlewares: { use(path: string, fn: (req: unknown, res: { setHeader(k: string, v: string): void; end(body: string): void; statusCode: number }) => void): void } }) {
+    server.middlewares.use("/dev/funder", (_req, res) => {
+      try {
+        const f = JSON.parse(readFileSync(funderFile, "utf8"));
+        res.setHeader("content-type", "application/json");
+        res.end(JSON.stringify({ seed: f.seed }));
+      } catch {
+        res.statusCode = 404;
+        res.end("{}");
+      }
+    });
+  },
 };
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), devFunder],
   define: { global: "globalThis" },
   server: {
     host: true,

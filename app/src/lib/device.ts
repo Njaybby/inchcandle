@@ -30,6 +30,8 @@ export interface RoomSecret {
   /** The code this device joined with, kept so the member can see which one they used. */
   code?: string;
   name?: string | null;
+  /** The host's seed for the room's Zcash account, which signs refunds. */
+  zseed?: string;
   at: number;
 }
 
@@ -38,6 +40,17 @@ interface Bundle {
   rooms: Record<string, RoomSecret>;
   /** Claim keys by bid id, hex. */
   claims: Record<string, string>;
+  /** This visitor's own wallet. */
+  wallet?: WalletSecret;
+}
+
+/** The seed behind this visitor's Zcash and EVM accounts. "signed" seeds come back from the same wallet signature on any device. */
+export interface WalletSecret {
+  seed: string;
+  /** The first block the Zcash account scans from, per network. */
+  birthdays: Record<string, number>;
+  source: "fresh" | "signed";
+  at: number;
 }
 
 let keysPromise: Promise<Keys> | null = null;
@@ -126,6 +139,12 @@ export const secrets = {
     const rooms = { ...bundle.rooms };
     delete rooms[id];
     bundle = { ...bundle, rooms };
+    changed();
+    await persist();
+  },
+  wallet: (): WalletSecret | undefined => bundle.wallet,
+  async saveWallet(wallet: WalletSecret | undefined) {
+    bundle = { ...bundle, wallet };
     changed();
     await persist();
   },

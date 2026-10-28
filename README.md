@@ -51,6 +51,14 @@ Zcash has no contracts, so a lot is held on the chain it already lives on.
 
 Each bid seals a fresh secp256k1 claim key address, so the winner's claim key becomes known at the same moment the winner does. `settle` needs EIP-712 signatures from k of the vault's n attesters, and the attesters run the same opening code the browsers do. `claim` takes a destination signed by the claim key, and anyone can submit it, so the relay pays the gas and the winner can receive at a brand new address. `settleNoSale` returns the lot if the reserve isn't met, and `reclaim` returns it to the seller after a deadline if nobody settles.
 
+## WALLETS
+
+Everyone who opens the app can have their own wallet, made in their browser. One seed gives a shielded Zcash account, which pays bid deposits and balances, and an EVM account for sellers. The seed sits in the same encrypted bundle as the room keys and never leaves the browser.
+
+You can also recover a wallet by signing one fixed message with MetaMask or Rabby. The same browser wallet always signs the same bytes, so you get the same Inchcandle wallet back on any device, and signing sends nothing.
+
+On the local chain the wallet page has a faucet button that sends 20 test ZEC from the chain's funder and mines it in.
+
 ## ACCESS
 
 A room is public, private or hidden. Public rooms are listed and anyone can take a paddle. Private rooms are listed by name only and need a code. Hidden rooms aren't listed.
@@ -94,8 +102,20 @@ The sealing tests include positive controls: a bid sealed to a past round has to
 
 - Sealing, the beacon check and the opening run in the browser.
 - We've run the chain layer in the browser against a local regtest chain: a deposit with a sealed memo was paid to a room paddle and read back with its value, memo and paddle, and a refund was sent and read back by the funder.
-- The room screens still run on a preview network, where the directory stores sealed bids the way the chain would. Moving them onto the light client is the next step.
+- Rooms can run on the local Zcash chain. Bidders pay deposits and balances from their own wallets, and every member's browser reads the bids from the room's notes on the chain. Rooms on the preview network keep the sealed bids in the directory instead.
+- The attesters still read the directory's copy of each bid, because they run in Node and the light client runs in the browser. Members' browsers check the result against the chain.
 - The vaults and the 2-of-3 attester committee have run end to end on a local EVM chain, ending with the winner claiming an NFT, including a run with one attester stopped.
+
+## FULL RUN: LOCAL ZCASH CHAIN AND BASE SEPOLIA
+
+We ran the whole thing on 28 October 2026, 21 of 21 checks. Two bidders each made a wallet in their own browser (one on a phone) and took test ZEC from the faucet. A seller put an NFT into a vault on Base Sepolia, and the room ran on the local Zcash chain. Both sealed bids went out as shielded payments from the bidders' wallets to their paddles, with the bid in the memo, and the host's browser read them back from the chain still sealed. At the drand round every browser opened them, the winner paid the balance from her wallet, two of three attesters signed, the relay settled, and the winner claimed the NFT to a fresh address.
+
+| | Base Sepolia |
+|---|---|
+| Deposit into the vault | [`0x5329a395…`](https://sepolia.basescan.org/tx/0x5329a395afc079f53e5fcd4470a71666f4f71b8a3749370ce4511bc586259457) |
+| Lot vault | [`0x9Cb4f63e54e3f23A1073805129d8e2fecCdF4281`](https://sepolia.basescan.org/address/0x9Cb4f63e54e3f23A1073805129d8e2fecCdF4281) |
+| Settle | [`0x6c065602…`](https://sepolia.basescan.org/tx/0x6c06560255aeee0cd6c0bb8326c4c05260bcc57ec1e18a9769aff77f3f0cea6d) |
+| Claim to a fresh address | [`0x32d882f3…`](https://sepolia.basescan.org/tx/0x32d882f3c523590729c2b6b1c94d7225afebc6ce37d1cb95cf01cf30b429a34b) |
 
 ## BASE SEPOLIA RUN
 

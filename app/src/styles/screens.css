@@ -1856,3 +1856,12 @@
     display: none;
   }
 }
+
+/* The visitor's wallet on the device page. */
+.wallet-panel .row {
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.wallet-panel .t-micro {
+  margin-top: 10px;
+}

@@ -2,7 +2,7 @@ import type { RoomTerms } from "./types";
 
 // The shapes the directory sends and receives. Shared by the app and the directory server.
 
-export type Network = "preview" | "test" | "main";
+export type Network = "preview" | "regtest" | "test" | "main";
 
 /** Public rooms show everything, private rooms only their name, hidden rooms nothing. */
 export type Listing = "public" | "private" | "hidden";

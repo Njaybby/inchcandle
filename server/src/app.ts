@@ -38,7 +38,8 @@ type Env = { Variables: { device: Device | null; body: string } };
 const roomIdPattern = /^[abcdefghijkmnpqrstuvwxyz23456789]{12}$/;
 const codeIdPattern = /^[0-9a-f]{32}$/;
 const b64url = /^[A-Za-z0-9_-]+$/;
-const networks = ["preview", "test", "main"];
+// "regtest" rooms pay on a local Zcash chain; the directory keeps a copy of each bid beside the chain, which the attesters read.
+const networks = ["preview", "regtest", "test", "main"];
 const listings = ["public", "private", "hidden"];
 
 interface RoomRow {
@@ -396,7 +397,7 @@ export function createApp({ db, committee, relayToken, now = Date.now }: Options
   app.post("/rooms/:id/bids", async (c) => {
     const device = signed(c);
     const row = await room(c.req.param("id"));
-    if (row.network !== "preview") throw new Refused(409, "network", "This room runs on Zcash. Send your bid from your wallet.");
+    if (row.network !== "preview" && row.network !== "regtest") throw new Refused(409, "network", "This room runs on Zcash. Send your bid from your wallet.");
     const member = await db.get<{ paddle: number }>("select paddle from members where room_id = ? and device = ? and removed_at is null", row.id, device.id);
     if (!member) throw new Refused(403, "not-member", "Join the room before bidding.");
     limit(`bid:${device.id}`, 20, 60_000);
@@ -416,7 +417,7 @@ export function createApp({ db, committee, relayToken, now = Date.now }: Options
   app.post("/rooms/:id/payments", async (c) => {
     const device = signed(c);
     const row = await room(c.req.param("id"));
-    if (row.network !== "preview") throw new Refused(409, "network", "This room runs on Zcash. Pay from your wallet.");
+    if (row.network !== "preview" && row.network !== "regtest") throw new Refused(409, "network", "This room runs on Zcash. Pay from your wallet.");
     const member = await db.get<{ paddle: number }>("select paddle from members where room_id = ? and device = ? and removed_at is null", row.id, device.id);
     if (!member) throw new Refused(403, "not-member", "Only a member can pay into the room.");
     const { claimKey, amount } = json<{ claimKey: string; amount: string }>(c);

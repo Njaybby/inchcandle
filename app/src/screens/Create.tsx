@@ -761,6 +761,7 @@ function AccessStep({ d, set }: { d: Draft; set: Setter }) {
   ];
   const networks: { key: Network; title: string; note: string; ready: boolean }[] = [
     { key: "preview", title: "Preview network", note: "The directory holds the sealed bids, as the chain would. No money moves.", ready: true },
+    ...(import.meta.env.DEV ? [{ key: "regtest" as Network, title: "Local Zcash chain", note: "Real shielded payments on a regtest chain on this machine. Bidders pay deposits from their own wallet.", ready: true }] : []),
     { key: "test", title: "Zcash testnet", note: "Bids as shielded payments from Zodl. Arrives with the light-client rooms.", ready: false },
     { key: "main", title: "Zcash mainnet", note: "Real deposits in the Sapling pool. After the testnet rehearsal.", ready: false },
   ];
@@ -818,7 +819,7 @@ function ReviewStep({ d, terms, vault, committee, tasks }: { d: Draft; terms: Ro
     ["Reserve", d.reserve ? `${d.reserve} ZEC, sealed` : "None"],
     ["Listing", d.listing === "public" ? "Public" : d.listing === "private" ? "Private, name only" : "Hidden"],
     [d.listing === "public" ? "Paddles" : "Codes", String(d.paddles)],
-    ["Network", "Preview network"],
+    ["Network", d.network === "regtest" ? "Local Zcash chain" : "Preview network"],
   ];
   if (vault && chain)
     rows.push(

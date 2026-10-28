@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { onChain, payBalance } from "../../lib/chainRoom";
 import { ArrowSquareOut, Check, CircleNotch, Clock, PaperPlaneTilt, Vault, WarningCircle } from "@phosphor-icons/react";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Address, Hex } from "viem";
@@ -167,11 +168,17 @@ function Claim({
   async function pay() {
     setBusy(true);
     try {
+      if (onChain(terms)) {
+        const paddle = secrets.room(terms.id)?.paddle;
+        if (!paddle) throw new Error("This device holds no paddle in the room.");
+        const txid = await payBalance(terms, paddle, balance);
+        toast(`Balance paid on chain, transaction ${txid.slice(0, 12)}…`);
+      }
       await api.pay(terms.id, { claimKey: claimAddress, amount: balance.toString() });
       onPaid();
       toast("Balance recorded. The attesters check it before they sign.");
     } catch (e) {
-      toast(e instanceof ApiError ? e.message : "Couldn't record the payment.", "error");
+      toast(e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Couldn't record the payment.", "error");
     } finally {
       setBusy(false);
     }
@@ -202,7 +209,7 @@ function Claim({
             <b>{balance === 0n ? "Your deposit covers the price" : paid ? `Balance of ${formatZec(balance)} ZEC paid` : `Pay the balance, ${formatZec(balance)} ZEC`}</b>
             {balance > 0n && !paid && (
               <button type="button" className="btn gold sm" onClick={pay} disabled={busy}>
-                Pay on the preview network
+                {onChain(terms) ? "Pay from your wallet" : "Pay on the preview network"}
               </button>
             )}
           </span>

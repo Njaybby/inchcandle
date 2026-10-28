@@ -97,6 +97,7 @@ export async function createRoom(input: NewRoomInput): Promise<Created> {
   const createdAt = Date.now();
   const round = openingRound(input.closesAt);
   const { seal } = await import("./seal");
+  const chain = input.network === "regtest" ? await (await import("./chainRoom")).makeRoomAccount(id) : null;
   const reserve = input.reserve === null ? undefined : toBase64Url(await seal(round, roomTag(id), encodePayload({ amount: input.reserve, claim: new Uint8Array(32), name: null })));
   const terms: RoomTerms = {
     v: 1,
@@ -121,6 +122,7 @@ export async function createRoom(input: NewRoomInput): Promise<Created> {
     paddles: input.paddles,
     lot: input.lot,
     vault: input.vault,
+    ...(chain ? { zcash: chain.zcash } : {}),
   };
 
   const coded = input.listing !== "public";
@@ -140,7 +142,7 @@ export async function createRoom(input: NewRoomInput): Promise<Created> {
     codes: book.map((b) => b.entry),
     grants,
   });
-  await secrets.saveRoom(id, { role: "host", key: key ? toBase64Url(key) : undefined, book: book.map(({ code, paddle }) => ({ code, paddle })), name: terms.name, at: createdAt });
+  await secrets.saveRoom(id, { role: "host", key: key ? toBase64Url(key) : undefined, book: book.map(({ code, paddle }) => ({ code, paddle })), name: terms.name, ...(chain ? { zseed: chain.seed } : {}), at: createdAt });
   local.addHosted(id);
   return { record, terms, book: book.map(({ code, paddle }) => ({ code, paddle })) };
 }

@@ -55,7 +55,9 @@ export interface RoomTerms {
   /** "local" for a photo kept in this browser, or a URL. */
   photo?: string;
   /** Version 2 terms say where the room runs, who can see it, how many paddles exist, what is sold and where it is held. */
-  network?: "preview" | "test" | "main";
+  network?: "preview" | "regtest" | "test" | "main";
+  /** On a Zcash network: the room account's viewing key and the block its scan starts from. Members import it view-only to read bids from the chain. */
+  zcash?: { ufvk: string; birthday: number };
   listing?: "public" | "private" | "hidden";
   paddles?: number;
   lot?: { kind: LotKind; detail?: string };
@@ -90,6 +92,8 @@ export interface MyBid {
   claimKey?: string;
   sealedAt: number;
   paid: boolean;
+  /** On a Zcash network: the transaction that paid the deposit with this bid as its memo. */
+  txid?: string;
 }
 
 export interface Opening {

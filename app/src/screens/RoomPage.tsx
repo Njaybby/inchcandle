@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowsClockwise, Check, CheckCircle, Eye, Key, LockSimple, ShieldCheck, WarningCircle } from "@phosphor-icons/react";
 import { api, usePoll } from "../lib/api";
+import { chainBids, onChain } from "../lib/chainRoom";
 import { useSecretsVersion } from "../lib/device";
 import { formatName, formatSentence, sealed as isSealed } from "../lib/formats";
 import { useNow } from "../lib/hooks";
@@ -113,8 +114,17 @@ function Room({ terms, role, paddle, listing, tab, onChange }: { terms: RoomTerm
   const canRead = listing === "public" || !!role;
   const wire = usePoll(() => (canRead ? api.bids(terms.id) : Promise.resolve([])), 3000, [terms.id, canRead]);
   const committee = usePoll(() => api.attesters(), 0).data ?? [];
-  const arrived: SealedBid[] = useMemo(() => (wire.data ?? []).map((b) => ({ id: b.id, envelope: b.envelope, deposit: b.deposit, at: b.at, seq: b.seq, paddle: b.paddle })), [wire.data]);
+  // On a Zcash network every browser reads the bids from the room's notes on the chain, not from the directory.
+  const chain = onChain(terms) && canRead;
+  const notes = usePoll(() => (chain ? chainBids(terms) : Promise.resolve(null)), 5000, [terms.id, chain]);
   const myBids = useMemo(() => local.myBids(terms.id).filter((b) => b.paid), [terms.id, version]);
+  const arrived: SealedBid[] = useMemo(() => {
+    if (chain) {
+      const ids = new Map(myBids.map((b) => [b.envelope, b.id]));
+      return (notes.data ?? []).map((b) => ({ ...b, id: ids.get(b.envelope) ?? b.id }));
+    }
+    return (wire.data ?? []).map((b) => ({ id: b.id, envelope: b.envelope, deposit: b.deposit, at: b.at, seq: b.seq, paddle: b.paddle }));
+  }, [chain, notes.data, wire.data, myBids]);
   const mine = useMemo(() => new Set(myBids.map((b) => b.id)), [myBids]);
   const opening = useOpening(terms, arrived, now);
   const candle = terms.format === "candle";
@@ -161,6 +171,7 @@ function Room({ terms, role, paddle, listing, tab, onChange }: { terms: RoomTerm
           </span>
         )}
         {role === "member" && paddle && <span className="chip">Paddle {paddle}</span>}
+        {onChain(terms) && <span className="chip" data-tone="gold">Local Zcash chain</span>}
       </div>
       <h1 className="t-title room-title">{terms.name}</h1>
       {terms.line && <p className="t-lead">{terms.line}</p>}
