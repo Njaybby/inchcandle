@@ -1,0 +1,19 @@
+# Attester 1 and the relay on Fly. Deploy from the repository root: fly deploy -c relay/fly.toml
+# Secrets: IC_ATTESTER_KEYS, IC_RELAY_TOKEN, IC_CHAINS, IC_NUDGE.
+app = "inchcandle-relay"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  IC_API = "https://inchcandle.vercel.app"
+  IC_ATTESTER = "1"
+
+[processes]
+  attester = "npx tsx src/attester.ts"
+  relay = "npx tsx src/relay.ts"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

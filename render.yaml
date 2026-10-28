@@ -1,0 +1,17 @@
+# Attester 2 on Render. The free tier sleeps when idle, so the attester serves GET /tick and the relay calls it every few seconds.
+# Secrets set in the dashboard: IC_ATTESTER_KEYS.
+services:
+  - type: web
+    name: inchcandle-attester
+    runtime: docker
+    plan: free
+    dockerfilePath: ./relay/Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: IC_API
+        value: https://inchcandle.vercel.app
+      - key: IC_ATTESTER
+        value: "2"
+      - key: IC_ATTESTER_KEYS
+        sync: false

@@ -1,0 +1,53 @@
+name: inchcandle-regtest
+
+services:
+  zakura:
+    image: zakuracore/zakura:1.6.0
+    command: ["zakurad", "start"]
+    environment:
+      CONFIG_FILE_PATH: /config/zakurad.toml
+      ZAKURA_STATE__CACHE_DIR: /data
+    volumes:
+      - chain:/data
+      - ./zakurad.toml:/config/zakurad.toml:ro
+    ports:
+      - "127.0.0.1:18232:18232"
+
+  lightwalletd:
+    image: ghcr.io/zcashlabs/thus-spoke-zakura-lightwalletd:0.3.0
+    user: "0:0"
+    command:
+      - --no-tls-very-insecure
+      - --grpc-bind-addr
+      - 0.0.0.0:9067
+      - --rpchost
+      - zakura
+      - --rpcport
+      - "18232"
+      - --rpcuser
+      - unused
+      - --rpcpassword
+      - unused
+      - --data-dir
+      - /var/lib/lightwalletd
+      - --log-file
+      - /dev/stdout
+    volumes:
+      - lwd:/var/lib/lightwalletd
+    depends_on:
+      - zakura
+    restart: on-failure
+
+  grpc-web:
+    image: traefik:v3.1
+    volumes:
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic.yml:/etc/traefik/dynamic.yml:ro
+    ports:
+      - "127.0.0.1:18080:80"
+    depends_on:
+      - lightwalletd
+
+volumes:
+  chain:
+  lwd:

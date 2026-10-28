@@ -1,0 +1,6 @@
+relay/keys/
+**/node_modules/
+**/.env*
+server/data/
+contracts/broadcast/
+contracts/cache/

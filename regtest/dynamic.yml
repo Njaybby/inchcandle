@@ -1,0 +1,21 @@
+http:
+  routers:
+    regtest:
+      service: lightwalletd
+      rule: PathPrefix(`/`)
+      middlewares:
+        - grpc-web
+      entryPoints:
+        - web
+
+  middlewares:
+    grpc-web:
+      grpcWeb:
+        allowOrigins:
+          - "*"
+
+  services:
+    lightwalletd:
+      loadBalancer:
+        servers:
+          - url: h2c://lightwalletd:9067

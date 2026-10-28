@@ -1,0 +1,21 @@
+# A local Zcash chain for Inchcandle: every upgrade through NU6.3 is active from height 1 and NU7 is left off.
+[network]
+network = "Regtest"
+listen_addr = "0.0.0.0:18233"
+
+[network.testnet_parameters]
+lockbox_disbursements = [{ address = "t26YoyZ1iPgiMEWL4zGUm74eVWfhyDMXzY2", amount = 0 }]
+
+[network.testnet_parameters.activation_heights]
+"NU6.3" = 1
+
+[rpc]
+listen_addr = "0.0.0.0:18232"
+enable_cookie_auth = false
+
+[state]
+cache_dir = "/data"
+
+[mining]
+miner_address = "zregtestsapling17cdzltttzqdd0dlc4fh5uq5ul5hw66wfqrzztf4veyhxuj9rwfj9xrxv3khdepwkr2adqyw487g"
+extra_coinbase_data = "inchcandle-regtest"

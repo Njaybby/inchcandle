@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ZAWYft0Ye8I-9r7YCri9rg",
+    "name": "Attester Larch",
+    "address": "0x9f6e8543a1350A5366b083fd7FEdEdE4178dBfF3",
+    "boxKey": "BDAhgzovcOegjfOewyJT-j_JQgL-dDkXFtJkDIetURl6AxOuqipBfoqUzlZTi4Kk-0YDgx-JsWzvJ3x550DyF0A"
+  },
+  {
+    "id": "e67R-dKs0X6dYsuK-xuuWQ",
+    "name": "Attester Quill",
+    "address": "0xE53ABB90C3cC72475558E7a18FA89f8E73d5aB4E",
+    "boxKey": "BOi0RTqh95V5I8gX24T8QslHFvUymeJOWNcrqohTJwgGYrhACT3C8Wj2yyK4PDIrQQAvPyRWrYVMSFuHbcqpaio"
+  },
+  {
+    "id": "UiWxT7F5ZzXUNdOdpcHl4g",
+    "name": "Attester Harrow",
+    "address": "0x5312c229690d5c048a22dCc622B5CaF17Db94C8b",
+    "boxKey": "BD0-eHYlhMK6NiynpU4rc7BkSkPnjsq9CfetcsEh5vbUHYhAvv0H-hQB8LzATZOkZoPMVlke6GFyJigmlxl_9tk"
+  }
+]
