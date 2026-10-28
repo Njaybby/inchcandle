@@ -38,9 +38,13 @@ const devFunder = {
   },
 };
 
+// IC_NO_LIGHT=1 builds without the light client, for hosting on the preview network.
+const noLight = process.env.IC_NO_LIGHT === "1";
+
 export default defineConfig({
   plugins: [react(), devFunder],
-  define: { global: "globalThis" },
+  ...(noLight ? { resolve: { alias: { "@zcashcommunitygrants/webzjs-wallet": new URL("./src/lib/no-light-client.ts", import.meta.url).pathname } } } : {}),
+  define: { global: "globalThis", "import.meta.env.VITE_LIGHT_CLIENT": JSON.stringify(noLight ? "off" : "on") },
   server: {
     host: true,
     port,

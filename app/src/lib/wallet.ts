@@ -13,6 +13,9 @@ import * as z from "./zcash";
 /** The message a browser wallet signs to recover the same seed on any device. Changing a byte of it changes every recovered wallet. */
 export const signInMessage = "Inchcandle wallet\n\nSigning this message recovers your Inchcandle wallet on this device. It costs nothing and sends no transaction.";
 
+/** False in the hosted build, which has no light client and so no wallet. */
+export const available = import.meta.env.VITE_LIGHT_CLIENT !== "off";
+
 /** The chain this build pays on. Development builds run against the local regtest chain. */
 export const zcashNetwork: z.Network = (import.meta.env.VITE_ZCASH_NETWORK as z.Network | undefined) ?? "regtest";
 
