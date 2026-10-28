@@ -18,7 +18,10 @@ import { signRequest } from "./keys";
 // Every room is marked as an example. Bids are sealed for real to their drand round by bot devices that join like anyone else.
 
 const base = process.env.IC_API ?? "http://127.0.0.1:5242";
-const rpc = process.env.IC_RPC ?? "http://127.0.0.1:8545";
+// IC_SEED_CHAIN=base-sepolia puts the vault rooms on Base Sepolia, paid for by IC_SELLER_KEY. The default is the local devnet.
+const onBase = process.env.IC_SEED_CHAIN === "base-sepolia";
+const rpc = process.env.IC_RPC ?? (onBase ? "https://sepolia.base.org" : "http://127.0.0.1:8545");
+const where = onBase ? "on Base Sepolia" : "on the local devnet";
 const zat = (n: number) => BigInt(Math.round(n * 1e8));
 const minute = 60_000;
 
@@ -85,7 +88,7 @@ const specs: Spec[] = [
   },
   {
     name: "Genesis edition",
-    line: "A demo NFT on the local devnet, held in its own vault.",
+    line: `A demo NFT ${where}, held in its own vault.`,
     format: "second",
     closesIn: 3 * minute,
     deposit: 0.5,
@@ -111,7 +114,7 @@ const specs: Spec[] = [
   },
   {
     name: "Seed round allocation, 25,000 MOCK",
-    line: "Demo tokens on the local devnet, sealed bids for the whole block.",
+    line: `Demo tokens ${where}, sealed bids for the whole block.`,
     format: "second",
     closesIn: 9 * 60 * minute,
     deposit: 1,
@@ -149,11 +152,13 @@ const specs: Spec[] = [
   },
 ];
 
-const devSeller = privateKeyToAccount("0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d");
-const deployments = JSON.parse(readFileSync(new URL("../../contracts/deployments/anvil.json", import.meta.url), "utf8"));
+const devSeller = privateKeyToAccount((onBase ? process.env.IC_SELLER_KEY : "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d") as `0x${string}`);
+const deployments = JSON.parse(readFileSync(new URL(`../../contracts/deployments/${onBase ? "84532" : "anvil"}.json`, import.meta.url), "utf8"));
 const pc = createPublicClient({ transport: http(rpc) });
 const wc = createWalletClient({ account: devSeller, transport: http(rpc) });
-const anvil = { id: 31337, name: "anvil", nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: [rpc] } } } as const;
+const anvil = onBase
+  ? ({ id: 84532, name: "base-sepolia", nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: [rpc] } } } as const)
+  : ({ id: 31337, name: "anvil", nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: [rpc] } } } as const);
 
 async function openVault(roomId: string, kind: "nft" | "token", committee: Attester[], closesAt: number): Promise<VaultRef> {
   const factory = deployments.factory as Address;
@@ -171,14 +176,15 @@ async function openVault(roomId: string, kind: "nft" | "token", committee: Attes
     asset = [0, deployments.nft, id, 1n];
   } else {
     const amount = 25_000n * 10n ** 18n;
-    const tabi = parseAbi(["function approve(address,uint256) returns (bool)"]);
+    const tabi = parseAbi(["function approve(address,uint256) returns (bool)", "function mint(address,uint256)"]);
+    if (onBase) await pc.waitForTransactionReceipt({ hash: await wc.writeContract({ chain: anvil, address: deployments.token, abi: tabi, functionName: "mint", args: [devSeller.address, amount] }) });
     await pc.waitForTransactionReceipt({ hash: await wc.writeContract({ chain: anvil, address: deployments.token, abi: tabi, functionName: "approve", args: [factory, amount] }) });
     asset = [2, deployments.token, 0n, amount];
   }
   await pc.waitForTransactionReceipt({ hash: await wc.writeContract({ chain: anvil, address: factory, abi: fabi, functionName: "open", args: [rid, asset, attesters, 2, settleBy] }) });
   return {
-    chain: "anvil",
-    chainId: 31337,
+    chain: onBase ? "base-sepolia" : "anvil",
+    chainId: anvil.id,
     factory,
     address: predicted,
     asset: { standard: kind === "nft" ? "erc721" : "erc20", token: asset[1], id: asset[2].toString(), amount: asset[3].toString() },
