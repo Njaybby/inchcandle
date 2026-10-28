@@ -97,6 +97,24 @@ The sealing tests include positive controls: a bid sealed to a past round has to
 - The room screens still run on a preview network, where the directory stores sealed bids the way the chain would. Moving them onto the light client is the next step.
 - The vaults and the 2-of-3 attester committee have run end to end on a local EVM chain, ending with the winner claiming an NFT, including a run with one attester stopped.
 
+## BASE SEPOLIA RUN
+
+We ran a full room against a real vault on Base Sepolia on 28 October 2026. A seller minted a demo NFT and deposited it into a vault, two bidders joined a private room with one-use codes and placed sealed bids, the room opened at its drand round, two of the three attesters signed, the relay settled, and the winner claimed the NFT to a brand new address. The bids ran on the preview network; every EVM step is on chain.
+
+| | Base Sepolia |
+|---|---|
+| Vault factory | [`0x5a6e1792739FDCA3C114688FC5562f38B3548758`](https://sepolia.basescan.org/address/0x5a6e1792739FDCA3C114688FC5562f38B3548758) |
+| Demo NFT | [`0xf287BE3997af4Bceb958d5353F29f6f5DB07072a`](https://sepolia.basescan.org/address/0xf287BE3997af4Bceb958d5353F29f6f5DB07072a), token 543112 |
+| Mint | [`0x90ca16f0…`](https://sepolia.basescan.org/tx/0x90ca16f049e734dca60d8e45d7b73c9d09c8ee5c69f42d4bee0e7fdc7e2cfc76) |
+| Approve | [`0x1bfd789b…`](https://sepolia.basescan.org/tx/0x1bfd789b27f472b31cfb22ab947cb416fd3788fbffec6ebcee26992ec01317d9) |
+| Deposit into the vault | [`0x3493b8bd…`](https://sepolia.basescan.org/tx/0x3493b8bdf7791488d4117e05f128dc02eddbd082b7f7c6a4d44b3a0334e1ed80) |
+| Lot vault | [`0x92522B3D48B890eb42750CD621BD0c468647E588`](https://sepolia.basescan.org/address/0x92522B3D48B890eb42750CD621BD0c468647E588) |
+| Settle, 2 of 3 attesters | [`0x9193ecb9…`](https://sepolia.basescan.org/tx/0x9193ecb99b861a6841b3cec6327659e2ee6915bcbef0669786a2b76ebe107a51) |
+| Claim to a fresh address | [`0x8239f9ca…`](https://sepolia.basescan.org/tx/0x8239f9ca6f6a7f7992f936cf077ba35f2c25532227e6a202182d0d1d9b992ca0) |
+| Winner's new address | [`0x810fb6c8b5075705952285245c41a836b19aabad`](https://sepolia.basescan.org/address/0x810fb6c8b5075705952285245c41a836b19aabad) |
+
+Ethereum Sepolia is not deployed. The factory deploys its implementation in its constructor, and on Sepolia that estimates at 18.75M gas, above the 16.78M per-transaction cap. Splitting the two deploys fixes it.
+
 The public Zcash testnet now runs NU7, and the pinned `librustzcash` can't build NU7 testnet transactions, which is why the chain run uses regtest. The pinned memory wallet doesn't track Ironwood notes either, so rooms receive in Sapling. A deposit from an Ironwood wallet crosses pools and shows its amount, but every deposit in a room is the same amount, so that only shows the deposit.
 
 ## LICENSE

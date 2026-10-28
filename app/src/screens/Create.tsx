@@ -18,6 +18,7 @@ import {
   Stack,
   Tag,
   Vault,
+  Wallet as WalletIcon,
   WarningCircle,
 } from "@phosphor-icons/react";
 import type { Address } from "viem";
@@ -625,6 +626,14 @@ function VaultStep({ d, set, committee }: { d: Draft; set: Setter; committee: At
         )}
       </div>
       {owned && <p className={owned.startsWith("Your") ? "status" : "status"} data-tone={owned.startsWith("Your wallet holds this") || owned.startsWith("Your wallet holds") ? "done" : "error"}>{owned.startsWith("Your") ? <Check size={16} /> : <WarningCircle size={16} />}{owned}</p>}
+      {chain?.factory && chain.key !== "anvil" && !wallet && (
+        <div className="row">
+          <button type="button" className="btn sm" onClick={() => connectWallet(chain).then(setWallet).catch((e) => toast(e instanceof Error ? e.message : "Couldn't connect a wallet."))}>
+            <WalletIcon size={15} />
+            Connect wallet
+          </button>
+        </div>
+      )}
       {chain?.demo && wallet && (
         <div className="dev-box">
           <p className="t-small">
