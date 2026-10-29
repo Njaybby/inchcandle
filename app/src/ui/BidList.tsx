@@ -85,7 +85,7 @@ export function BidList({
     );
     return () => timers.forEach(clearTimeout);
     // The choreography runs once per change of state or of the bids, not on every render.
-  }, [state.status, arrival.join(","), standing.join(",")]);
+  }, [state.status, arrival.join(","), standing.join(","), final.join(",")]);
 
   useLayoutEffect(() => {
     const first = before.current;

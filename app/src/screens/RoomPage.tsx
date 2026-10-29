@@ -162,8 +162,8 @@ function Room({ terms, role, paddle, listing, tab, onChange }: { terms: RoomTerm
         <span className="chip" data-tone={listing === "public" ? undefined : "frost"}>
           {listing === "public" ? "Public" : listing === "private" ? "Private" : "Hidden"}
         </span>
-        <span className="chip" data-tone="frost">
-          Preview network
+        <span className="chip" data-tone={onChain(terms) ? "gold" : "frost"}>
+          {onChain(terms) ? "Local Zcash chain" : "Preview network"}
         </span>
         {host && (
           <span className="chip" data-tone="gold">
@@ -171,7 +171,6 @@ function Room({ terms, role, paddle, listing, tab, onChange }: { terms: RoomTerm
           </span>
         )}
         {role === "member" && paddle && <span className="chip">Paddle {paddle}</span>}
-        {onChain(terms) && <span className="chip" data-tone="gold">Local Zcash chain</span>}
       </div>
       <h1 className="t-title room-title">{terms.name}</h1>
       {terms.line && <p className="t-lead">{terms.line}</p>}
