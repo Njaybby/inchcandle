@@ -1433,6 +1433,11 @@
   border-color: rgb(91 228 155 / 0.25);
 }
 
+.factory-next {
+  margin-top: 14px;
+  max-width: 72ch;
+}
+
 .factory-name {
   font-weight: 500;
 }

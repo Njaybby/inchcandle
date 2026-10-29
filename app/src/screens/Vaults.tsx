@@ -78,6 +78,10 @@ function VaultRow({ seen, mobile }: { seen: Seen; mobile: boolean }) {
   );
 }
 
+function list(names: string[]) {
+  return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
 export function Vaults() {
   const mobile = useMobile();
   const { all } = useRooms();
@@ -86,6 +90,9 @@ export function Vaults() {
   }, []);
   const mine = all.filter((s) => s.terms?.vault && s.role);
   const publicVaults = all.filter((s) => s.terms?.vault && !s.role);
+  const shown = chains.filter((c) => import.meta.env.DEV || c.key !== "anvil");
+  const live = shown.filter((c) => c.factory);
+  const pending = shown.filter((c) => !c.factory);
 
   return (
     <div className={mobile ? "m-page" : "page"}>
@@ -137,25 +144,18 @@ export function Vaults() {
           <span className="t-small">One per chain. Every EVM chain runs the same two contracts.</span>
         </div>
         <div className="factory-grid">
-          {chains
-            .filter((c) => import.meta.env.DEV || c.key !== "anvil")
-            .map((c) => (
-              <div key={c.key} className="factory" data-live={!!c.factory}>
-                <span className="factory-name">{c.name}</span>
-                {c.factory ? <Hash value={c.factory} keep={6} /> : <span className="t-micro">{c.testnet ? "Deploys when a deployer key is funded" : "After the testnet rehearsal"}</span>}
-                <span className="chip" data-tone={c.factory ? "ok" : undefined}>
-                  {c.factory ? "Live" : "Not deployed"}
-                </span>
-              </div>
-            ))}
-          {plannedChains.map((c) => (
-            <div key={c.key} className="factory">
+          {live.map((c) => (
+            <div key={c.key} className="factory" data-live="true">
               <span className="factory-name">{c.name}</span>
-              <span className="t-micro">{c.note}</span>
-              <span className="chip">Planned</span>
+              <Hash value={c.factory!} keep={6} />
+              <span className="chip" data-tone="ok">
+                Live
+              </span>
             </div>
           ))}
         </div>
+        {pending.length > 0 && <p className="t-small factory-next">Next, once a deployer key is funded: {list(pending.filter((c) => c.testnet).map((c) => c.name))}. Mainnets follow the testnet rehearsal: {list(pending.filter((c) => !c.testnet).map((c) => c.name))}.</p>}
+        {plannedChains.length > 0 && <p className="t-small factory-next">Planned: {list(plannedChains.map((c) => c.name))}.</p>}
       </section>
     </div>
   );
