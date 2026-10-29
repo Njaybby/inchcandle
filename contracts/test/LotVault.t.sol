@@ -22,7 +22,7 @@ contract LotVaultTest is Test {
     bytes32 resultHash = keccak256("judged bids");
 
     function setUp() public {
-        factory = new InchcandleVaultFactory();
+        factory = new InchcandleVaultFactory(address(0));
         nft = new MockNFT();
         token = new MockToken();
         edition = new MockEdition();
@@ -71,6 +71,15 @@ contract LotVaultTest is Test {
         assertEq(address(vault), predicted);
         assertEq(nft.ownerOf(7), address(vault));
         assertEq(uint8(vault.state()), uint8(LotVault.State.Held));
+    }
+
+    function test_factoryCanCloneAnImplementationDeployedOnItsOwn() public {
+        LotVault implementation = new LotVault();
+        factory = new InchcandleVaultFactory(address(implementation));
+        assertEq(factory.implementation(), address(implementation));
+        LotVault vault = openNft();
+        assertEq(address(vault), factory.predict(seller, roomId));
+        assertEq(nft.ownerOf(7), address(vault));
     }
 
     function test_settleThenClaimToAFreshAddress() public {

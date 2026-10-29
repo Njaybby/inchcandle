@@ -12,7 +12,7 @@ interface Deployment {
   edition: Address;
 }
 
-/** Test-network deployments written by contracts/script/DeployTestnet.s.sol, one file per chain id. */
+/** Test-network deployments written by contracts/deploy-testnets.sh, one file per chain id. */
 const deployed = Object.values(import.meta.glob<Deployment>("../../../contracts/deployments/[0-9]*.json", { eager: true, import: "default" }));
 
 function testnet(c: Omit<Chain, "factory" | "testnet" | "demo">): Chain {

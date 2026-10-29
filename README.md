@@ -133,7 +133,15 @@ We ran a full room against a real vault on Base Sepolia on 28 October 2026. A se
 | Claim to a fresh address | [`0x8239f9ca…`](https://sepolia.basescan.org/tx/0x8239f9ca6f6a7f7992f936cf077ba35f2c25532227e6a202182d0d1d9b992ca0) |
 | Winner's new address | [`0x810fb6c8b5075705952285245c41a836b19aabad`](https://sepolia.basescan.org/address/0x810fb6c8b5075705952285245c41a836b19aabad) |
 
-Ethereum Sepolia is not deployed. The factory deploys its implementation in its constructor, and on Sepolia that estimates at 18.75M gas, above the 16.78M per-transaction cap. Splitting the two deploys fixes it.
+Ethereum Sepolia charges far more gas per byte of deployed code than Base Sepolia, so the factory and its implementation cannot go out in one transaction there: together they estimate at 18.75M gas, above the 16.78M per-transaction cap. The factory therefore accepts an implementation deployed on its own, and `deploy-testnets.sh` sends each contract with `cast`, which takes its gas estimate from the node rather than from a local simulation.
+
+| Ethereum Sepolia | Address |
+|---|---|
+| Factory | [`0xf702F529FF748b06434Fcf4001c377b3CBEd7C6d`](https://sepolia.etherscan.io/address/0xf702F529FF748b06434Fcf4001c377b3CBEd7C6d) |
+| LotVault implementation | [`0x8Cfb9DE8699c3B285f0074Ef970D941e6de6ffCC`](https://sepolia.etherscan.io/address/0x8Cfb9DE8699c3B285f0074Ef970D941e6de6ffCC) |
+| Demo NFT | [`0xDd889dF43c88b3adA80a920663202873A90C1067`](https://sepolia.etherscan.io/address/0xDd889dF43c88b3adA80a920663202873A90C1067) |
+
+The Ethereum Sepolia contracts are deployed and their code is verified on chain against the build. No room has settled a vault there yet.
 
 The public Zcash testnet now runs NU7, and the pinned `librustzcash` can't build NU7 testnet transactions, which is why the chain run uses regtest. The pinned memory wallet doesn't track Ironwood notes either, so rooms receive in Sapling. A deposit from an Ironwood wallet crosses pools and shows its amount, but every deposit in a room is the same amount, so that only shows the deposit.
 

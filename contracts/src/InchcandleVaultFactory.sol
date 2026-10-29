@@ -36,8 +36,9 @@ contract InchcandleVaultFactory {
     error BadDeadline();
     error BadAsset();
 
-    constructor() {
-        implementation = address(new LotVault());
+    /// Pass zero to deploy a fresh implementation here, or an existing LotVault where one transaction cannot hold both.
+    constructor(address impl) {
+        implementation = impl == address(0) ? address(new LotVault()) : impl;
     }
 
     function salt(address seller, bytes32 roomId) public pure returns (bytes32) {

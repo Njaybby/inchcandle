@@ -3,14 +3,16 @@ pragma solidity ^0.8.24;
 
 import {Script, console} from "forge-std/Script.sol";
 import {InchcandleVaultFactory} from "../src/InchcandleVaultFactory.sol";
+import {LotVault} from "../src/LotVault.sol";
 import {DemoLot, DemoToken, DemoEdition} from "../src/DemoLots.sol";
 
 /// Deploys the factory and the three demo collections to a test network and records them in deployments/<chain id>.json.
-/// Run from a fresh key so the addresses match on every chain.
+/// The implementation goes out on its own because Ethereum Sepolia charges too much per byte of code for one transaction to deploy both.
 contract DeployTestnet is Script {
     function run() external {
         vm.startBroadcast();
-        InchcandleVaultFactory factory = new InchcandleVaultFactory();
+        LotVault implementation = new LotVault();
+        InchcandleVaultFactory factory = new InchcandleVaultFactory(address(implementation));
         DemoLot nft = new DemoLot();
         DemoToken token = new DemoToken();
         DemoEdition edition = new DemoEdition();

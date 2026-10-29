@@ -8,7 +8,7 @@ import {InchcandleVaultFactory} from "../src/InchcandleVaultFactory.sol";
 contract DeployFactory is Script {
     function run() external returns (InchcandleVaultFactory factory) {
         vm.startBroadcast();
-        factory = new InchcandleVaultFactory();
+        factory = new InchcandleVaultFactory(address(0));
         vm.stopBroadcast();
         console.log("factory", address(factory));
         console.log("implementation", factory.implementation());

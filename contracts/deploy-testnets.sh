@@ -23,6 +23,21 @@ for name in "${targets[@]}"; do
   balance=$(cast balance "$deployer" --rpc-url "$url")
   if [ "$balance" = "0" ]; then echo "$name ($id): $deployer has no balance, skipped"; continue; fi
   echo "$name ($id): deploying from $deployer, nonce $(cast nonce "$deployer" --rpc-url "$url")"
-  forge script script/DeployTestnet.s.sol --rpc-url "$url" --private-key "$IC_DEPLOYER_KEY" --broadcast --slow
+  # Each contract goes out with cast so the node prices the gas.
+  # Forge simulates locally and underestimates code deposit on chains that charge more per byte, so its transactions run out of gas there.
+  create() {
+    local out
+    out=$(cast send --rpc-url "$url" --private-key "$IC_DEPLOYER_KEY" --json --create "$(forge inspect "$1" bytecode)" "${@:2}")
+    [ "$(jq -r .status <<<"$out")" = "0x1" ] || { echo "$name: $1 failed: $(jq -r .transactionHash <<<"$out")" >&2; exit 1; }
+    jq -r .contractAddress <<<"$out"
+  }
+  implementation=$(create LotVault)
+  factory=$(create InchcandleVaultFactory "constructor(address)" "$implementation")
+  nft=$(create DemoLot)
+  token=$(create DemoToken)
+  edition=$(create DemoEdition)
+  jq -n --argjson chainId "$id" --arg factory "$(cast to-check-sum-address "$factory")" --arg implementation "$(cast to-check-sum-address "$implementation")" \
+    --arg nft "$(cast to-check-sum-address "$nft")" --arg token "$(cast to-check-sum-address "$token")" --arg edition "$(cast to-check-sum-address "$edition")" \
+    '{chainId: $chainId, edition: $edition, factory: $factory, implementation: $implementation, nft: $nft, token: $token}' > "deployments/$id.json"
   cat "deployments/$id.json"
 done

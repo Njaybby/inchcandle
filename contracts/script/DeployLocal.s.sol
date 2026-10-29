@@ -10,7 +10,7 @@ contract DeployLocal is Script {
     function run() external {
         address seller = vm.envOr("IC_DEV_SELLER", address(0x70997970C51812dc3A010C7d01b50e0d17dc79C8));
         vm.startBroadcast();
-        InchcandleVaultFactory factory = new InchcandleVaultFactory();
+        InchcandleVaultFactory factory = new InchcandleVaultFactory(address(0));
         MockNFT nft = new MockNFT();
         MockToken token = new MockToken();
         MockEdition edition = new MockEdition();
